@@ -13,6 +13,11 @@ class PackageView(views.APIView):
         if range is None:
             range = "*"
 
+        # SCC aside: this doesn't sanitise inputs and Snyk spots and highlights this
+        #       - but this isn't added in this PR! That said: raising flagging because
+        #       we might want to add sanitisation at other points (see comment later in
+        #       get_package()) but it could make sense to have a common approach shared
+        #       here.
         package_info = npm.get_package(package_name, range)
         serializer = PackageSerializer(package_info)
         return Response(serializer.data)

@@ -26,6 +26,7 @@ Then we can try the `/package` endpoint. Here is an example that uses `curl` and
 curl -s http://localhost:8000/package/react/16.13.0 | jq .
 ```
 
+# SCC issue: this is outdated, it'd be useful to update to point at the correct file!
 Most of the code is boilerplate; the logic for the `/package` endpoint can be
 found in [src/package.py](src/package.py), and some basic tests in
 [test/test_package.py](test/test_package.py)
@@ -36,6 +37,7 @@ You can run the tests with:
 poetry run pytest
 ```
 
+# SCC issue: this doesn't appear to work for me
 The code is linted using `pre-commit`, you can run this via:
 
 ```sh
