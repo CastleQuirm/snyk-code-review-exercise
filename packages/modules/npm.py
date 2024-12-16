@@ -6,7 +6,7 @@ from packages.models import VersionedPackage
 NPM_REGISTRY_URL = "https://registry.npmjs.org"
 
 
-def get_package(name: str, range: str) -> VersionedPackage:
+def get_package(name: str, range: str, package_list: dict[str]) -> VersionedPackage:
     url = f"{NPM_REGISTRY_URL}/{name}"
 
     # SCC issue - what happens if this fails? Can we do something better/more useful than just crash?
@@ -26,7 +26,7 @@ def get_package(name: str, range: str) -> VersionedPackage:
     #        getting the entire range and having an exponentially expanding problem space?  Make it configurable?
     # SCC issue - the value of range here is a string we've received from either the caller or from the NPM over the
     #        internet, with no validation. We should ensure this is correctly formatted.
-    version = semver.min_satisfying(versions, range)
+    version = semver.max_satisfying(versions, range)
     version_record = npm_package["versions"][version]
 
     package = VersionedPackage(
@@ -46,9 +46,17 @@ def get_package(name: str, range: str) -> VersionedPackage:
     # SCC major - there's no handling of asynchronous requests here - we request synchronously for every child (and from
     #        there every further descendant dependency). This can be very slow and inefficient!
     
-    package.dependencies = [
-        get_package(name=dep_name, range=dep_range) for dep_name, dep_range in dependencies.items()
-    ]
+    package_identifier = package.name + ":" + package.version
+
+    if not package_identifier in package_list.keys():
+        print(package_identifier + " - new")
+        package_list[package_identifier] = True
+        dependencies = [get_package(name=dep_name, range=dep_range, package_list=package_list) for dep_name, dep_range in dependencies.items()]
+    else:
+        print(package_identifier + " - caught a loop")
+        dependencies = []
+
+    package.dependencies = dependencies
 
     return package
 

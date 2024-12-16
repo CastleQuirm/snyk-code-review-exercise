@@ -18,6 +18,6 @@ class PackageView(views.APIView):
         #       we might want to add sanitisation at other points (see comment later in
         #       get_package()) but it could make sense to have a common approach shared
         #       here.
-        package_info = npm.get_package(package_name, range)
+        package_info = npm.get_package(package_name, range, package_list={})
         serializer = PackageSerializer(package_info)
         return Response(serializer.data)
